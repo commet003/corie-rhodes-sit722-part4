@@ -1,1 +1,81 @@
 # Your Solution
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-catalog-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: book-catalog
+  template:
+    metadata:
+      labels:
+        app: book-catalog
+    spec:
+      containers:
+      - name: book-catalog
+        image: crpart4.azurecr.io/book_catalog:latest
+        ports:
+        - containerPort: 4000
+        imagePullPolicy: Always
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://part04_user:xuxzkAQukYtrPGuuCRwOTjBnE07ZWSnE@dpg-crrmskt6l47c73clfl1g-a.oregon-postgres.render.com/part04"
+      imagePullSecrets:
+      - name: acr-auth
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: book-catalog
+spec:
+  type: LoadBalancer
+  selector:
+    app: book-catalog
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 4000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-management-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-management
+  template:
+    metadata:
+      labels:
+        app: inventory-management
+    spec:
+      containers:
+      - name: inventory-management
+        image: crpart4.azurecr.io/inventory_management:latest
+        ports:
+        - containerPort: 4001
+        imagePullPolicy: Always
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://part04_user:xuxzkAQukYtrPGuuCRwOTjBnE07ZWSnE@dpg-crrmskt6l47c73clfl1g-a.oregon-postgres.render.com/part04"
+      imagePullSecrets:
+      - name: acr-auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-management
+spec:
+  type: LoadBalancer
+  selector:
+    app: inventory-management
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 4001
